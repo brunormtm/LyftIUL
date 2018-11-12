@@ -57,6 +57,7 @@ void read_condutores_to_memory(){
     exit(1);
   }
 
+//count_lines or 1, not sure
   while (fread (&condutor, sizeof (struct Tcondutor), count_lines(fp), fp))
   {
     fscanf(fp, "%d %c %c %c %c %c %c %c %d %d %f %d %d %li %d", condutor.numero, condutor.nome, condutor.turma, condutor.telemovel, condutor.email, condutor.tipo, condutor.marca, condutor.matricula, condutor.viagens,
@@ -79,6 +80,7 @@ void read_passageiros_to_memory(){
     exit(1);
   }
 
+//count_lines or 1, not sure
   while (fread (&condutor, sizeof (struct Tcondutor), count_lines(fp), fp))
   {
     fscanf(fp, "%d %c %c %c %c %c", passageiro.numero, passageiro.nome, passageiro.turma, passageiro.telemovel, passageiro.email, passageiro.c_credito)
