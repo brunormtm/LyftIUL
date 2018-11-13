@@ -16,8 +16,18 @@ typedef struct {
   float saldo;
 } Condutor;
 
+typedef struct {
+  char data[50];
+  int nCondutor;
+  int nPassageiro;
+  int pontos;
+  float valor;
+} Viagem;
+
 Condutor listaDeCondutores[100];
 int indiceListaDeCondutores = 0;
+Viagem listaDeViagens[100];
+int indiceListaDeViagens = 0;
 
 int convertToInt(char *c){
   int n = atoi(&c[0]);
@@ -47,8 +57,8 @@ void fillListaDeCondutores(){
   char linha[200];
   while(fgets(linha, 200, condutores)){
     Condutor c;
-
     char temp[200];
+
     obter_substring(linha, temp, ':', 0);
     c.numero = convertToInt(temp);
     obter_substring(linha, c.nome, ':', 1);
@@ -64,7 +74,6 @@ void fillListaDeCondutores(){
     c.pontos = convertToInt(temp);
     obter_substring(linha, temp, ':', 10);
     c.saldo = convertToFloat(temp);
-    printf("%f\n", c.saldo);
 
     listaDeCondutores[indiceListaDeCondutores] = c;
     indiceListaDeCondutores++;
@@ -72,9 +81,37 @@ void fillListaDeCondutores(){
   fclose(condutores);
 }
 
+void fillListaDeViagens(){
+  FILE *viagens;
+  viagens = fopen("viagens.txt", "r");
+  char linha[200];
+
+  while(fgets(linha, 200, viagens)){
+    Viagem v;
+    char temp[200];
+
+    obter_substring(linha, v.data, ':', 0);
+    obter_substring(linha, temp, ':', 1);
+    v.nCondutor = convertToInt(temp);
+    obter_substring(linha, temp, ':', 2);
+    v.nPassageiro = convertToInt(temp);
+    obter_substring(linha, temp, ':', 3);
+    v.pontos = convertToInt(temp);
+    obter_substring(linha, temp, ':', 4);
+    v.valor = convertToFloat(temp);
+
+    printf("%d\n", v.pontos);
+
+    listaDeViagens[indiceListaDeViagens] = v;
+    indiceListaDeViagens++;
+  }
+  fclose(viagens);
+}
+
 int main() {
 
   fillListaDeCondutores();
+  fillListaDeViagens();
 
   FILE *condutores;
   FILE *viagens;
