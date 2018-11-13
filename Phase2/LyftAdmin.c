@@ -2,11 +2,7 @@
 #include <string.h>
 #include <signal.h>
 #include <stdlib.h>
-
-
-#define CONDUTORES "path para condutores" #TODO
-#define PASSAGEIROS "path para passageiros.txt" #TODO
-
+#include <unistd.h>
 
 typedef struct{
   int numero;
@@ -20,101 +16,136 @@ typedef struct{
   int viagens;
   int pontos;
   float saldo;
-  //estes abaixo nao existem no txt original da fase 1!!!
   int activo;
   long disponivel_desde;
   int PID;
-} Tcondutor;
+} Condutor;
 //numero nome turma telemovel email tipo marca matricula viagens pontos saldo activo disponivel_desde PID - aux para copiar
 // %d %c %c %c %c %c %c %c %d %d %f %d %d %li %d - aux para copiar
+
 typedef struct{
-int numero;
-char nome[50];
-char turma[10];
-char telemovel[15];
-char email[40];
-char c_credito[20];
-} Tpassageiro;
+  int numero;
+  char nome[50];
+  char turma[10];
+  char telemovel[15];
+  char email[40];
+  char c_credito[20];
+} Passageiro;
 //numero nome turma telemovel email c_credito - aux para copiar
 // %d %c %c %c %c %c - aux para copiar
 
+Condutor listaDeCondutores[1000];
+int indiceListaDeCondutores = 0;
+Passageiro listaDePassageiros[1000];
+int indiceListaDePassageiros = 0;
 
-//1 ler ficheiros e carregar em memoria
-void read_databasefiles(){
-  read_condutores_to_memory();
-  read_passageiros_to_memory();
+int convertToInt(char *c){
+  int n = atoi(&c[0]);
+  return n;
 }
 
-void read_condutores_to_memory(){
-  FILE *fp;
-  struct Tcondutor condutor;
-
-  //abrir ficheiro - r for read
-  fp = fopen(CONDUTORES,"r");
-  //condutores.txt path missing
-  if (fp == NULL){
-    perror("File not found!");
-    exit(1);
-  }
-
-//count_lines or 1, not sure
-  while (fread (&condutor, sizeof (struct Tcondutor), count_lines(fp), fp))
-  {
-    fscanf(fp, "%d %c %c %c %c %c %c %c %d %d %f %d %d %li %d", condutor.numero, condutor.nome, condutor.turma, condutor.telemovel, condutor.email, condutor.tipo, condutor.marca, condutor.matricula, condutor.viagens,
-    condutor.pontos, condutor.saldo, condutor.activo, condutor.disponivel_desde, condutor.PID )
-    //activo,disponivel_desde nao existe no file original, o PID vem de outro file - remover???.
-    //separar por :?
-  }
-  fclose(fp);
-
-}
-void read_passageiros_to_memory(){
-  FILE *fp;
-  struct Tpassageiro passageiro;
-
-  //abrir ficheiro - r for read
-  fp = fopen(PASSAGEIROS,"r");
-  //passageiros.txt path missing
-  if (fp == NULL){
-    perror("File not found!");
-    exit(1);
-  }
-
-//count_lines or 1, not sure
-  while (fread (&condutor, sizeof (struct Tcondutor), count_lines(fp), fp))
-  {
-    fscanf(fp, "%d %c %c %c %c %c", passageiro.numero, passageiro.nome, passageiro.turma, passageiro.telemovel, passageiro.email, passageiro.c_credito)
-  }
-  fclose(fp);
-
+float convertToFloat(char *c){
+  int n = atof(&c[0]);
+  return n;
 }
 
-//countlines of a file aux
+void obter_substring(char linha[], char resultado[], char separador, int indice) {
+ int i, j=0, meu_indice = 0;
+ for (i=0; linha[i] != '\0'; i++) {
+   if ( linha[i] == separador ) {
+     meu_indice++;
+   } else if (meu_indice == indice) {
+     resultado[j++]=linha[i];
+   }
+ }
+  resultado[j]='\0';
+}
+
 int count_lines(FILE *fp){
   int count = 0;
   int linelength = 1000;
   char linesize[linelength]; //had to define a max linesize for this ?
 
-  while(fgets(linesize,linelength, fp) != null){
-    count++
+  while(fgets(linesize,linelength, fp) != NULL){
+    count++;
   }
   return count;
 }
 
+void read_condutores_to_memory(){
+  FILE *condutores;
+  condutores = fopen("condutores.txt", "r");
+  char linha[200];
+  while(fgets(linha, 200, condutores)){
+    Condutor c;
+    char temp[200];
+
+    obter_substring(linha, temp, ':', 0);
+    c.numero = convertToInt(temp);
+    obter_substring(linha, c.nome, ':', 1);
+    obter_substring(linha, c.turma, ':', 2);
+    obter_substring(linha, c.telemovel, ':', 3);
+    obter_substring(linha, c.email, ':', 4);
+    obter_substring(linha, c.tipo, ':', 5);
+    obter_substring(linha, c.marca, ':', 6);
+    obter_substring(linha, c.matricula, ':', 7);
+    obter_substring(linha, temp, ':', 8);
+    c.viagens = convertToInt(temp);
+    obter_substring(linha, temp, ':', 9);
+    c.pontos = convertToInt(temp);
+    obter_substring(linha, temp, ':', 10);
+    c.saldo = convertToFloat(temp);
+
+    listaDeCondutores[indiceListaDeCondutores] = c;
+    indiceListaDeCondutores++;
+  }
+  fclose(condutores);
+}
+
+void read_passageiros_to_memory(){
+  FILE *passageiros;
+  passageiros = fopen("condutores.txt", "r");
+  char linha[200];
+  while(fgets(linha, 200, passageiros)){
+    Passageiro p;
+    char temp[200];
+
+    obter_substring(linha, temp, ':', 0);
+    p.numero = convertToInt(temp);
+    obter_substring(linha, p.nome, ':', 1);
+    obter_substring(linha, p.turma, ':', 1);
+    obter_substring(linha, p.telemovel, ':', 1);
+    obter_substring(linha, p.email, ':', 4);
+    obter_substring(linha, p.c_credito, ':', 5);
+
+    listaDePassageiros[indiceListaDePassageiros] = p;
+    indiceListaDePassageiros++;
+  }
+  fclose(passageiros);
+}
+
+void saveCondutoresToFile(){
+  FILE *fileCondutores = fopen("condutores.txt", "w");
+  for (int i = 0; i < indiceListaDeCondutores; i++) {
+    Condutor c = listaDeCondutores[i];
+    fprintf(fileCondutores, "%d:%s:%s:%s:%s:%s:%s:%s:%d:%d:%f\n", c.numero, c.nome, c.turma, c.telemovel, c.email, c.tipo, c.marca, c.matricula, c.viagens, c.pontos, c.saldo);
+  }
+  fclose(fileCondutores);
+}
+
+void savePassageirosToFile(){
+  //escrever passageiros no txt com base em Tpassageiro
+}
 
 //2 criar liftadmin.pid e colocar la o seu PID
 void write_pid(){
   FILE*fp;
-
-  fp = fopen("lyftadmin.pid","w")
+  fp = fopen("lyftadmin.pid","w");
   if ( fp == NULL ) {
-      printf("Error creating file\n");
-      return;
-    }
-
-  //while?
-  fprintf (fp, "PID=%d\n", getpid() )
-
+    printf("Error creating file\n");
+    return;
+  }
+  fprintf (fp, "PID=%d\n", getpid());
   fclose(fp);
 }
 
@@ -123,48 +154,59 @@ void signals(){ //???????
   kill(getpid(),SIGUSR1);
   kill(getpid(),SIGTERM);
 }
-void updatesignal(int signal){
 
-    if(signal = SIGUSR1){
-      //ler coundutores.txt mas so acualizar pontos, viagens e saldos nos Tcondutores
-    }
-    signal(SIGUSR1, updatesignal);
+void updatesignal(int signal){
+  if(signal == SIGUSR1){
+    //ler coundutores.txt mas so acualizar pontos, viagens e saldos nos Tcondutores
+  }
+  //signal(SIGUSR1, updatesignal);
 }
+
 void terminatesignal(int signal){
   //Tratar SIGTERM
 
-    if(signal = SIGTERM){
-      write_passageiros_to_txt();
-      write_condutores_to_txt();
-      #TODO
-      //terminar?
-    }
+  if(signal == SIGTERM){
+    saveCondutoresToFile();
+    savePassageirosToFile();
+    //terminar?
+  }
 
-  signal(SIGTERM,terminatesignal);
+//  signal(SIGTERM,terminatesignal);
 }
 
-#TODO
-void write_condutores_to_txt(){
-  //escrever coundutores no txt com base em Tcoundutor
-}
-void write_passageiros_to_txt(){
-  //escrever passageiros no txt com base em Tpassageiro
+void read_enter(){
+  while ( getc(stdin) != '\n');
 }
 
+void printmemory(){
+  //imprimir memoria
+    //listar condutores e passageiros em memoria e indicar qtos são
+}
 
-//4 menu (main?)
-main(){
-  read_databasefiles();
+void modifypassenger(){
+  //alterar passageiro
+    //ler numero de estudante, se existe em Tpassageiro, re introduzir campos
+}
+void modifydriver(){
+  //alterar condutor
+    //ler numero de estudante, se existe em Tcondutor, re introduzir tudo menos viagens, pontos e saldo
+}
+
+//TO DO
+//5 alarm() de 60 em 60 segundos,fork() e execturar Lyfttask
+
+int main(){
+  read_condutores_to_memory();
+  read_passageiros_to_memory();
   write_pid();
-  signals();
+  //signals();
   int option;
     do {
 
       printf ("1. Imprimir memória\n");
       printf ("2. Alterar passageiro\n");
       printf ("3. Alterar condutor\n");
-
-      //nao e printf mas n me lembro da funçao certa
+      printf ("0. Sair\n");
       printf ("Escolha a opcao pretendida: ");
       scanf ("%d", &option );
 
@@ -183,32 +225,14 @@ main(){
           modifydriver();
           break;
 
+          case 0:
+          return 0;
+
           default:
-          printf("Insira uma opção válida!");
+          printf("Insira uma opção válida!\n");
           break;
       }
-    } while  ( opcao != 0 );
-
+    } while(option != 0);
+    return 0;
     //alarm() ?
 }
-
-void read_enter(){
-   while ( getc(stdin) != '\n');
-}
-
-void printmemory(){
-  //imprimir memoria
-    //listar condutores e passageiros em memoria e indicar qtos são
-}
-
-void modifypassenger(){
-  //alterar passageiro
-    //ler numero de estudante, se existe em Tpassageiro, re introduzir campos
-}
-void modifydriver(){
-  //alterar condutor
-    //ler numero de estudante, se existe em Tcondutor, re introduzir tudo menos viagens, pontos e saldo
-}
-
-#TODO
-//5 alarm() de 60 em 60 segundos,fork() e execturar Lyfttask
