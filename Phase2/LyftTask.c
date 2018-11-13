@@ -84,8 +84,14 @@ void fillListaDeCondutores(){
 void fillListaDeViagens(){
   FILE *viagens;
   viagens = fopen("viagens.txt", "r");
-  char linha[200];
 
+  if (viagens == NULL) {
+    printf("viagens.txt not found.\n");
+    fclose(viagens);
+    return;
+  }
+
+  char linha[200];
   while(fgets(linha, 200, viagens)){
     Viagem v;
     char temp[200];
@@ -100,28 +106,54 @@ void fillListaDeViagens(){
     obter_substring(linha, temp, ':', 4);
     v.valor = convertToFloat(temp);
 
-    printf("%d\n", v.pontos);
-
     listaDeViagens[indiceListaDeViagens] = v;
     indiceListaDeViagens++;
   }
   fclose(viagens);
 }
 
-int main() {
+void updateCondutores(){
+  for (int i = 0; i <= indiceListaDeViagens; i++) {
+    Viagem v = listaDeViagens[i];
+    for (int j = 0; j <= indiceListaDeCondutores; j++) {
+      Condutor c = listaDeCondutores[j];
+      if (v.nCondutor == c.numero) {
+        c.pontos = c.pontos + v.pontos;
+        c.viagens = c.viagens + 1;
+        c.saldo = c.saldo + v.valor;
+        i++;
+      }
+    }
+  }
+}
 
+void saveCondutoresToFile(){
+  FILE *fileCondutores = fopen("condutores.txt", "w");
+  for (int i = 0; i < indiceListaDeCondutores; i++) {
+    Condutor c = listaDeCondutores[i];
+    fprintf(fileCondutores, "%d:%s:%s:%s:%s:%s:%s:%s:%d:%d:%f\n", c.numero, c.nome, c.turma, c.telemovel, c.email, c.tipo, c.marca, c.matricula, c.viagens, c.pontos, c.saldo);
+    printf("%d:%s:%s:%s:%s:%s:%s:%s:%d:%d:%f\n", c.numero, c.nome, c.turma, c.telemovel, c.email, c.tipo, c.marca, c.matricula, c.viagens, c.pontos, c.saldo);
+  }
+  fclose(fileCondutores);
+}
+
+void deleteViagensFile(){
+  FILE *viagens = fopen("viagens.txt", "r");
+  if (viagens == NULL) {
+    return;
+  } else {
+    if (remove("viagens.txt") == 0)
+        printf("Deleted successfully\n");
+     else
+        printf("Unable to delete the file\n");
+  }
+}
+
+int main() {
   fillListaDeCondutores();
   fillListaDeViagens();
-
-  FILE *condutores;
-  FILE *viagens;
-
-  condutores = fopen("condutores.txt", "r+");
-  viagens = fopen("viagens.txt", "r+");
-
-  fclose(condutores);
-  fclose(viagens);
-
+  updateCondutores();
+  saveCondutoresToFile();
+  deleteViagensFile();
   return 0;
-
 }
