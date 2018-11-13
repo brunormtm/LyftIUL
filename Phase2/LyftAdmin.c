@@ -103,7 +103,7 @@ void read_condutores_to_memory(){
 
 void read_passageiros_to_memory(){
   FILE *passageiros;
-  passageiros = fopen("condutores.txt", "r");
+  passageiros = fopen("passageiros.txt", "r");
   char linha[200];
   while(fgets(linha, 200, passageiros)){
     Passageiro p;
@@ -112,8 +112,8 @@ void read_passageiros_to_memory(){
     obter_substring(linha, temp, ':', 0);
     p.numero = convertToInt(temp);
     obter_substring(linha, p.nome, ':', 1);
-    obter_substring(linha, p.turma, ':', 1);
-    obter_substring(linha, p.telemovel, ':', 1);
+    obter_substring(linha, p.turma, ':', 2);
+    obter_substring(linha, p.telemovel, ':', 3);
     obter_substring(linha, p.email, ':', 4);
     obter_substring(linha, p.c_credito, ':', 5);
 
@@ -133,7 +133,12 @@ void saveCondutoresToFile(){
 }
 
 void savePassageirosToFile(){
-  //escrever passageiros no txt com base em Tpassageiro
+  FILE *filePassageiros = fopen("passageiros.txt", "w");
+  for (int i = 0; i < indiceListaDePassageiros; i++) {
+    Passageiro p = listaDePassageiros[i];
+    fprintf(filePassageiros, "%d:%s:%s:%s:%s:%s\n", p.numero, p.nome, p.turma, p.telemovel, p.email, p.c_credito);
+  }
+  fclose(filePassageiros);
 }
 
 void write_pid(){
