@@ -45,7 +45,7 @@ int convertToInt(char *c){
 }
 
 float convertToFloat(char *c){
-  int n = atof(&c[0]);
+  float n = atof(&c[0]);
   return n;
 }
 
@@ -65,7 +65,6 @@ int count_lines(FILE *fp){
   int count = 0;
   int linelength = 1000;
   char linesize[linelength]; //had to define a max linesize for this ?
-
   while(fgets(linesize,linelength, fp) != NULL){
     count++;
   }
@@ -137,7 +136,6 @@ void savePassageirosToFile(){
   //escrever passageiros no txt com base em Tpassageiro
 }
 
-//2 criar liftadmin.pid e colocar la o seu PID
 void write_pid(){
   FILE*fp;
   fp = fopen("lyftadmin.pid","w");
@@ -149,7 +147,6 @@ void write_pid(){
   fclose(fp);
 }
 
-//3
 void signals(){ //???????
   kill(getpid(),SIGUSR1);
   kill(getpid(),SIGTERM);
@@ -195,6 +192,12 @@ void modifydriver(){
 //TO DO
 //5 alarm() de 60 em 60 segundos,fork() e execturar Lyfttask
 
+void leave(){
+  saveCondutoresToFile();
+  savePassageirosToFile();
+  exit(0);
+}
+
 int main(){
   read_condutores_to_memory();
   read_passageiros_to_memory();
@@ -208,29 +211,16 @@ int main(){
       printf ("3. Alterar condutor\n");
       printf ("0. Sair\n");
       printf ("Escolha a opcao pretendida: ");
-      scanf ("%d", &option );
 
+      scanf ("%d", &option );
       read_enter();
 
       switch(option){
-          case 1:
-          printmemory();
-          break;
-
-          case 2:
-          modifypassenger();
-          break;
-
-          case 3:
-          modifydriver();
-          break;
-
-          case 0:
-          return 0;
-
-          default:
-          printf("Insira uma opção válida!\n");
-          break;
+          case 1: printmemory(); break;
+          case 2: modifypassenger(); break;
+          case 3: modifydriver(); break;
+          case 0: leave(); break;
+          default: printf("Insira uma opção válida!\n");
       }
     } while(option != 0);
     return 0;

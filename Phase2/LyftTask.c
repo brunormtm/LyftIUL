@@ -35,7 +35,7 @@ int convertToInt(char *c){
 }
 
 float convertToFloat(char *c){
-  int n = atof(&c[0]);
+  float n = atof(&c[0]);
   return n;
 }
 
