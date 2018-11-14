@@ -121,6 +121,7 @@ void updateCondutores(){
         c.pontos = c.pontos + v.pontos;
         c.viagens = c.viagens + 1;
         c.saldo = c.saldo + v.valor;
+        listaDeCondutores[j] = c;
         i++;
       }
     }
@@ -132,7 +133,6 @@ void saveCondutoresToFile(){
   for (int i = 0; i < indiceListaDeCondutores; i++) {
     Condutor c = listaDeCondutores[i];
     fprintf(fileCondutores, "%d:%s:%s:%s:%s:%s:%s:%s:%d:%d:%f\n", c.numero, c.nome, c.turma, c.telemovel, c.email, c.tipo, c.marca, c.matricula, c.viagens, c.pontos, c.saldo);
-    printf("%d:%s:%s:%s:%s:%s:%s:%s:%d:%d:%f\n", c.numero, c.nome, c.turma, c.telemovel, c.email, c.tipo, c.marca, c.matricula, c.viagens, c.pontos, c.saldo);
   }
   fclose(fileCondutores);
 }
