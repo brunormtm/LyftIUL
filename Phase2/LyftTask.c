@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
 
 typedef struct {
   int numero;
@@ -28,6 +29,7 @@ Condutor listaDeCondutores[100];
 int indiceListaDeCondutores = 0;
 Viagem listaDeViagens[100];
 int indiceListaDeViagens = 0;
+int hasChange = 0;
 
 int convertToInt(char *c){
   int n = atoi(&c[0]);
@@ -110,12 +112,13 @@ void fillListaDeViagens(){
     indiceListaDeViagens++;
   }
   fclose(viagens);
+  hasChange = 1;
 }
 
 void updateCondutores(){
-  for (int i = 0; i <= indiceListaDeViagens; i++) {
+  for (int i = 0; i < indiceListaDeViagens; i++) {
     Viagem v = listaDeViagens[i];
-    for (int j = 0; j <= indiceListaDeCondutores; j++) {
+    for (int j = 0; j < indiceListaDeCondutores; j++) {
       Condutor c = listaDeCondutores[j];
       if (v.nCondutor == c.numero) {
         c.pontos = c.pontos + v.pontos;
@@ -149,11 +152,26 @@ void deleteViagensFile(){
   }
 }
 
+void sendSignal(){
+  if(hasChange){
+    FILE *f = fopen("lyftadmin.pid", "r");
+    if (f != NULL) {
+      char str[20];
+      char tmp[20];
+      fgets(tmp, 20, f);
+      obter_substring(tmp, str, '=', 1);
+      int val = atoi(str);
+      kill(val, SIGUSR1);
+    }
+  }
+}
+
 int main() {
   fillListaDeCondutores();
   fillListaDeViagens();
   updateCondutores();
   saveCondutoresToFile();
   deleteViagensFile();
+  sendSignal();
   return 0;
 }
