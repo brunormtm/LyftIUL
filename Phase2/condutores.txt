@@ -1,2 +1,2 @@
-88020:maria aguiar:EIB2:911555444:mguiar@gmail.com:carro:mercedes:88-TX-12:18:76:28.200001
-88021:luis aguiar:EIB2:911525444:lguiar@gmail.com:carro:bmw:88-TX-13:14:132:16.400000
+88020:maria aguiar:EIB2:911555444:mguiar@gmail.com:carro:mercedes:88-TX-12:22:100:45.000004
+88023:Luis Aguiar:EIA6:912341234:lguidar@gmail.com:bicicleta:mazda:88-JD-66:14:132:16.400000

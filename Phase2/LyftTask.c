@@ -60,7 +60,6 @@ void fillListaDeCondutores(){
   while(fgets(linha, 200, condutores)){
     Condutor c;
     char temp[200];
-
     obter_substring(linha, temp, ':', 0);
     c.numero = convertToInt(temp);
     obter_substring(linha, c.nome, ':', 1);
@@ -76,7 +75,6 @@ void fillListaDeCondutores(){
     c.pontos = convertToInt(temp);
     obter_substring(linha, temp, ':', 10);
     c.saldo = convertToFloat(temp);
-
     listaDeCondutores[indiceListaDeCondutores] = c;
     indiceListaDeCondutores++;
   }
@@ -88,7 +86,6 @@ void fillListaDeViagens(){
   viagens = fopen("viagens.txt", "r");
 
   if (viagens == NULL) {
-    printf("viagens.txt not found.\n");
     fclose(viagens);
     return;
   }
@@ -97,7 +94,6 @@ void fillListaDeViagens(){
   while(fgets(linha, 200, viagens)){
     Viagem v;
     char temp[200];
-
     obter_substring(linha, v.data, ':', 0);
     obter_substring(linha, temp, ':', 1);
     v.nCondutor = convertToInt(temp);
@@ -107,7 +103,6 @@ void fillListaDeViagens(){
     v.pontos = convertToInt(temp);
     obter_substring(linha, temp, ':', 4);
     v.valor = convertToFloat(temp);
-
     listaDeViagens[indiceListaDeViagens] = v;
     indiceListaDeViagens++;
   }
@@ -146,7 +141,7 @@ void deleteViagensFile(){
     return;
   } else {
     if (remove("viagens.txt") == 0)
-        printf("Deleted successfully\n");
+        return;
      else
         printf("Unable to delete the file\n");
   }

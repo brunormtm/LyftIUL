@@ -20,8 +20,6 @@ typedef struct{
   long disponivel_desde;
   int PID;
 } Condutor;
-//numero nome turma telemovel email tipo marca matricula viagens pontos saldo activo disponivel_desde PID - aux para copiar
-// %d %c %c %c %c %c %c %c %d %d %f %d %d %li %d - aux para copiar
 
 typedef struct{
   int numero;
@@ -31,8 +29,6 @@ typedef struct{
   char email[40];
   char c_credito[20];
 } Passageiro;
-//numero nome turma telemovel email c_credito - aux para copiar
-// %d %c %c %c %c %c - aux para copiar
 
 Condutor listaDeCondutores[1000];
 int indiceListaDeCondutores = 0;
@@ -71,6 +67,14 @@ int count_lines(FILE *fp){
   return count;
 }
 
+void removeSpace(char c[]){
+  for(int i=0;c[i]!='\0';i++){
+   if(c[i]=='\n'){
+      c[i]='\0';
+    }
+  }
+}
+
 void read_condutores_to_memory(){
   FILE *condutores;
   condutores = fopen("condutores.txt", "r");
@@ -78,7 +82,6 @@ void read_condutores_to_memory(){
   while(fgets(linha, 200, condutores)){
     Condutor c;
     char temp[200];
-
     obter_substring(linha, temp, ':', 0);
     c.numero = convertToInt(temp);
     obter_substring(linha, c.nome, ':', 1);
@@ -94,7 +97,6 @@ void read_condutores_to_memory(){
     c.pontos = convertToInt(temp);
     obter_substring(linha, temp, ':', 10);
     c.saldo = convertToFloat(temp);
-
     listaDeCondutores[indiceListaDeCondutores] = c;
     indiceListaDeCondutores++;
   }
@@ -108,7 +110,6 @@ void read_passageiros_to_memory(){
   while(fgets(linha, 200, passageiros)){
     Passageiro p;
     char temp[200];
-
     obter_substring(linha, temp, ':', 0);
     p.numero = convertToInt(temp);
     obter_substring(linha, p.nome, ':', 1);
@@ -116,7 +117,7 @@ void read_passageiros_to_memory(){
     obter_substring(linha, p.telemovel, ':', 3);
     obter_substring(linha, p.email, ':', 4);
     obter_substring(linha, p.c_credito, ':', 5);
-
+    removeSpace(p.c_credito);
     listaDePassageiros[indiceListaDePassageiros] = p;
     indiceListaDePassageiros++;
   }
@@ -152,50 +153,125 @@ void write_pid(){
   fclose(fp);
 }
 
-void signals(){ //???????
-  kill(getpid(),SIGUSR1);
-  kill(getpid(),SIGTERM);
+void readEnter(){
+  while (getc(stdin) != '\n');
 }
 
-void updatesignal(int signal){
-  if(signal == SIGUSR1){
-    //ler coundutores.txt mas so acualizar pontos, viagens e saldos nos Tcondutores
+void printMemory(){
+  for (int i = 0; i < indiceListaDeCondutores; i++) {
+    Condutor c = listaDeCondutores[i];
+    printf("%d:%s:%s:%s:%s:%s:%s:%s:%d:%d:%f\n", c.numero, c.nome, c.turma, c.telemovel, c.email, c.tipo, c.marca, c.matricula, c.viagens, c.pontos, c.saldo);
   }
-  //signal(SIGUSR1, updatesignal);
-}
-
-void terminatesignal(int signal){
-  //Tratar SIGTERM
-
-  if(signal == SIGTERM){
-    saveCondutoresToFile();
-    savePassageirosToFile();
-    //terminar?
+  for (int i = 0; i < indiceListaDePassageiros; i++) {
+    Passageiro p = listaDePassageiros[i];
+    printf("%d:%s:%s:%s:%s:%s\n", p.numero, p.nome, p.turma, p.telemovel, p.email, p.c_credito);
   }
-
-//  signal(SIGTERM,terminatesignal);
+  printf("\nNumero de Condutores: %d\n", indiceListaDeCondutores);
+  printf("Numero de passageiros: %d\n\n", indiceListaDePassageiros);
 }
 
-void read_enter(){
-  while ( getc(stdin) != '\n');
+void modifyPassenger(){
+  int num;
+  printf("\nIntroduza o numero de Aluno: ");
+  scanf ("%d", &num);
+  readEnter();
+  int indice;
+  Passageiro p;
+  int found = 0;
+  for (int i = 0; i < indiceListaDePassageiros; i++) {
+    p = listaDePassageiros[i];
+    if (p.numero == num) {
+      indice = i;
+      found = 1;
+    }
+  }
+  if(found){
+    p = listaDePassageiros[indice];
+    // FAZER FUNCAO PARA FAZER CHECK AOS ARGUMENTOS
+    printf("\nNumero de aluno antigo: %d", p.numero);
+    printf("\nNumero de aluno novo: ");
+    scanf("%d", &p.numero);
+    readEnter();
+    printf("\nNome antigo: %s", p.nome);
+    printf("\nNome novo: ");
+    fgets(p.nome, 50, stdin);
+    removeSpace(p.nome);
+    printf("\nTurma antiga: %s", p.turma);
+    printf("\nTurma nova: ");
+    fgets(p.turma, 10, stdin);
+    removeSpace(p.turma);
+    printf("\nTelemovel antigo: %s", p.telemovel);
+    printf("\nTelemovel novo: ");
+    fgets(p.telemovel, 15, stdin);
+    removeSpace(p.telemovel);
+    printf("\nEmail antigo: %s", p.email);
+    printf("\nEmail novo: ");
+    fgets(p.email, 40, stdin);
+    removeSpace(p.email);
+    printf("\nCC antigo: %s", p.c_credito);
+    printf("\nCC novo: ");
+    fgets(p.c_credito, 20, stdin);
+    removeSpace(p.c_credito);
+    listaDePassageiros[indice] = p;
+  } else {
+    printf("\nNao existe o Aluno na memoria");
+  }
 }
-
-void printmemory(){
-  //imprimir memoria
-    //listar condutores e passageiros em memoria e indicar qtos são
+void modifyDriver(){
+  int num;
+  printf("\nIntroduza o numero de Aluno: ");
+  scanf ("%d", &num);
+  readEnter();
+  int indice;
+  Condutor c;
+  int found = 0;
+  for (int i = 0; i < indiceListaDeCondutores; i++) {
+    c = listaDeCondutores[i];
+    if (c.numero == num) {
+      indice = i;
+      found = 1;
+    }
+  }
+  if(found){
+    c = listaDeCondutores[indice];
+    // FAZER FUNCAO PARA FAZER CHECK AOS ARGUMENTOS
+    printf("\nNumero de aluno antigo: %d", c.numero);
+    printf("\nNumero de aluno novo: ");
+    scanf("%d", &c.numero);
+    readEnter();
+    printf("\nNome antigo: %s", c.nome);
+    printf("\nNome novo: ");
+    fgets(c.nome, 50, stdin);
+    removeSpace(c.nome);
+    printf("\nTurma antiga: %s", c.turma);
+    printf("\nTurma nova: ");
+    fgets(c.turma, 10, stdin);
+    removeSpace(c.turma);
+    printf("\nTelemovel antigo: %s", c.telemovel);
+    printf("\nTelemovel novo: ");
+    fgets(c.telemovel, 15, stdin);
+    removeSpace(c.telemovel);
+    printf("\nEmail antigo: %s", c.email);
+    printf("\nEmail novo: ");
+    fgets(c.email, 40, stdin);
+    removeSpace(c.email);
+    printf("\nTipo de veiculo antigo: %s", c.tipo);
+    printf("\nTipo de veiculo novo: ");
+    fgets(c.tipo, 20, stdin);
+    removeSpace(c.tipo);
+    printf("\nMarca antiga: %s", c.marca);
+    printf("\nMarca nova: ");
+    fgets(c.marca, 20, stdin);
+    removeSpace(c.marca);
+    printf("\nMatricula antiga: %s", c.matricula);
+    printf("\nMatricula nova: ");
+    fgets(c.matricula, 20, stdin);
+    removeSpace(c.matricula);
+    listaDeCondutores[indice] = c;
+  } else {
+    printf("\nNao existe o Aluno na memoria");
+  }
 }
-
-void modifypassenger(){
-  //alterar passageiro
-    //ler numero de estudante, se existe em Tpassageiro, re introduzir campos
-}
-void modifydriver(){
-  //alterar condutor
-    //ler numero de estudante, se existe em Tcondutor, re introduzir tudo menos viagens, pontos e saldo
-}
-
-//TO DO
-//5 alarm() de 60 em 60 segundos,fork() e execturar Lyfttask
 
 void leave(){
   saveCondutoresToFile();
@@ -203,31 +279,47 @@ void leave(){
   exit(0);
 }
 
+void runLyftTask(){
+  if(fork() == 0){
+    execl("LyftTask", NULL);
+    printf("Failed to exec LyftTask\n");
+  }
+  alarm(60);
+}
+
+void handleSignal(int signum){
+  switch(signum){
+    case 30: read_condutores_to_memory(); break;
+    case 15: leave(); break;
+    case 14: runLyftTask(); break;
+    default: printf("Didn't recognize the signal\n");
+  }
+}
+
 int main(){
   read_condutores_to_memory();
   read_passageiros_to_memory();
+  signal(SIGUSR1, handleSignal);
+  signal(SIGTERM, handleSignal);
+  signal(SIGALRM, handleSignal);
+  alarm(60);
   write_pid();
-  //signals();
   int option;
     do {
-
-      printf ("1. Imprimir memória\n");
+      printf ("\n1. Imprimir memória\n");
       printf ("2. Alterar passageiro\n");
       printf ("3. Alterar condutor\n");
       printf ("0. Sair\n");
       printf ("Escolha a opcao pretendida: ");
-
-      scanf ("%d", &option );
-      read_enter();
-
+      scanf ("%d", &option);
+      readEnter();
       switch(option){
-          case 1: printmemory(); break;
-          case 2: modifypassenger(); break;
-          case 3: modifydriver(); break;
+          case 1: printMemory(); break;
+          case 2: modifyPassenger(); break;
+          case 3: modifyDriver(); break;
           case 0: leave(); break;
           default: printf("Insira uma opção válida!\n");
       }
     } while(option != 0);
     return 0;
-    //alarm() ?
 }
