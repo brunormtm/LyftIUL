@@ -76,6 +76,7 @@ void removeSpace(char c[]){
 }
 
 void read_condutores_to_memory(){
+  indiceListaDeCondutores = 0;
   FILE *condutores;
   condutores = fopen("condutores.txt", "r");
   char linha[200];
