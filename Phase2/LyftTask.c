@@ -56,6 +56,11 @@ void obter_substring(char linha[], char resultado[], char separador, int indice)
 void fillListaDeCondutores(){
   FILE *condutores;
   condutores = fopen("condutores.txt", "r");
+  if(condutores == NULL){
+    fclose(condutores);
+    printf("ERROR: condutores.txt not found\n");
+    exit(0);
+  }
   char linha[200];
   while(fgets(linha, 200, condutores)){
     Condutor c;

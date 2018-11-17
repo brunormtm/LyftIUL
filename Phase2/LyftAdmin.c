@@ -35,6 +35,16 @@ int indiceListaDeCondutores = 0;
 Passageiro listaDePassageiros[1000];
 int indiceListaDePassageiros = 0;
 
+int checkIfFileExists(const char * filename){
+    FILE *file;
+    file = fopen(filename, "r");
+    if (file == NULL){
+        fclose(file);
+        return 0;
+    }
+    return 1;
+}
+
 int convertToInt(char *c){
   int n = atoi(&c[0]);
   return n;
@@ -235,7 +245,6 @@ void modifyDriver(){
   }
   if(found){
     c = listaDeCondutores[indice];
-    // FAZER FUNCAO PARA FAZER CHECK AOS ARGUMENTOS
     printf("\nNumero de aluno antigo: %d", c.numero);
     printf("\nNumero de aluno novo: ");
     scanf("%d", &c.numero);
@@ -297,7 +306,15 @@ void handleSignal(int signum){
   }
 }
 
+void checkFiles(){
+  if (checkIfFileExists("condutores.txt") == 0 || checkIfFileExists("passageiros.txt") == 0) {
+    printf("ERROR: condutores.txt OR passageiros.txt not found!\n");
+    exit(0);
+  }
+}
+
 int main(){
+  checkFiles();
   read_condutores_to_memory();
   read_passageiros_to_memory();
   signal(SIGUSR1, handleSignal);
