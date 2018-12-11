@@ -1,8 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include "defines.h"
 
 typedef struct{
   int numero;
@@ -29,6 +25,18 @@ typedef struct{
   char email[40];
   char c_credito[20];
 } Passageiro;
+
+typedef struct{
+	long tipo;
+	struct {
+		int pid_passageiro;
+		int pid_condutor;
+		char local_encontro[100];
+		long data;
+		float pontos;
+		float valor;
+	} dados;
+} MsgViagem;
 
 Condutor listaDeCondutores[1000];
 int indiceListaDeCondutores = 0;
@@ -169,10 +177,12 @@ void readEnter(){
 }
 
 void printMemory(){
-  for (int i = 0; i < indiceListaDeCondutores; i++) {
+  printf("\nCondutores\n\n");
+	for (int i = 0; i < indiceListaDeCondutores; i++) {
     Condutor c = listaDeCondutores[i];
     printf("%d:%s:%s:%s:%s:%s:%s:%s:%d:%d:%f\n", c.numero, c.nome, c.turma, c.telemovel, c.email, c.tipo, c.marca, c.matricula, c.viagens, c.pontos, c.saldo);
   }
+	printf("\nPassageiros\n\n");
   for (int i = 0; i < indiceListaDePassageiros; i++) {
     Passageiro p = listaDePassageiros[i];
     printf("%d:%s:%s:%s:%s:%s\n", p.numero, p.nome, p.turma, p.telemovel, p.email, p.c_credito);
@@ -313,17 +323,55 @@ void checkFiles(){
   }
 }
 
+void makeSharedMemory(){
+  int id = shmget(10001, 1000 * sizeof(Condutor) , IPC_CREAT | 0666);
+  exit_on_error(id, "shmget");
+
+  int di = shmget(10002, 1000 * sizeof(Passageiro) , IPC_CREAT | 0666);
+  exit_on_error(di, "shmget");
+
+  Condutor* c = (Condutor *)shmat(id, 0, 0);
+  if (c == NULL) {perror("error attaching"); exit(1);}
+  
+  Passageiro* p = (Passageiro *)shmat(di, 0, 0);
+  if (p == NULL) {perror("error attaching"); exit(1);}
+
+  c = listaDeCondutores;
+  p = listaDePassageiros;
+}
+
+void listenForMessages(){
+	if(fork() == 0){
+		int msgid;
+		msgid = msgget(10003, 0666 | IPC_CREAT );
+		exit_on_error(msgid, "criacao de lista de msg");
+		
+		int status;
+		MsgViagem m;
+
+		while(1){
+			status = msgrcv(msgid, &m, sizeof(m.dados), 1, 0);
+			exit_on_error (status, "erro de recepcao");
+			printf("\nmensagem recebida\n");
+		}
+	}
+}
+
 int main(){
   checkFiles();
   read_condutores_to_memory();
   read_passageiros_to_memory();
+  makeSharedMemory();
   signal(SIGUSR1, handleSignal);
   signal(SIGTERM, handleSignal);
   signal(SIGALRM, handleSignal);
   alarm(60);
   write_pid();
+  listenForMessages();
+
   int option;
     do {
+	    option = 9;
       printf ("\n1. Imprimir memória\n");
       printf ("2. Alterar passageiro\n");
       printf ("3. Alterar condutor\n");
@@ -332,10 +380,10 @@ int main(){
       scanf ("%d", &option);
       readEnter();
       switch(option){
-          case 1: printMemory(); break;
-          case 2: modifyPassenger(); break;
-          case 3: modifyDriver(); break;
-          case 0: leave(); break;
+          case 1: printMemory(); makeSharedMemory(); break;
+          case 2: modifyPassenger(); makeSharedMemory(); break;
+          case 3: modifyDriver(); makeSharedMemory(); break;
+          case 0: makeSharedMemory(); leave(); break;
           default: printf("Insira uma opção válida!\n");
       }
     } while(option != 0);
