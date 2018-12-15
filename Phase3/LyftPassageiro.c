@@ -57,7 +57,7 @@ void getAnswear(){
 	MsgViagem m;
 	status = msgrcv(id, &m, sizeof(m.dados), getpid(), 0);
 	exit_on_error(status, "recepcao");
-	printf("PID do Condutor: %d\n", m.dados.pid_condutor);
+	printf("PID do Condutor: %d\nLocal do Condutor: %s\n", m.dados.pid_condutor, m.dados.local_encontro);
 }
 
 void joinSem(){

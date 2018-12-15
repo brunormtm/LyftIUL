@@ -54,7 +54,10 @@ void getAnswear(){
 void dealWithPassenger(){
 	m.tipo = m.dados.pid_passageiro;
 	m.dados.pid_condutor = getpid();
-	//m.dados.local_encontro = m.dados.local_encontro;
+	printf("Onde se encontra? ");
+	char s[50];
+	fgets(s, 50, stdin);
+	strcpy(m.dados.local_encontro, s);
 	status = msgsnd(id, &m, sizeof(m.dados), 0);
 	exit_on_error(status, "envio de msg");
 
@@ -65,12 +68,12 @@ void dealWithPassenger(){
 	//User Input
 	char t[10];
 	printf("Valor da Viagem: ");
-	fgets(t, 100, stdin);
+	fgets(t, 10, stdin);
 	m.dados.valor = atof(t);
 	int value = -1;
 	while(value > 10 || value < 0){
 		printf("Pontuacao de 0 a 10 da Viagem: ");
-		fgets(t, 100, stdin);
+		fgets(t, 10, stdin);
 		value = atoi(t);
 	}
 	m.dados.pontos = value;
