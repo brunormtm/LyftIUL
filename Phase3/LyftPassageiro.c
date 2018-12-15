@@ -1,26 +1,5 @@
 #include "defines.h"
 
-typedef struct{
-	long tipo;
-	struct{
-		int pid_passageiro;
-		int pid_condutor;
-		char local_encontro[100];
-		long data;
-		float pontos;
-		float valor;
-	} dados;
-} MsgViagem;
-
-typedef struct{
-	int numero;
-	char nome[50];
-	char turma[10];
-	char telemovel[15];
-	char email[40];
-	char c_credito[20];
-} Passageiro;
-
 Passageiro x;
 char local[100];
 int id, status, semPassageiros, fila;
@@ -37,7 +16,7 @@ Passageiro getPassageiro(){
 }
 
 int checkPassageiro(){
-	int id = shmget(10002, 1000 * sizeof(Passageiro), 0600);
+	int id = shmget(MEMPASS, 1000 * sizeof(Passageiro), 0600);
 	exit_on_error(id, "error shmget");
 
 	down(semPassageiros);
@@ -61,7 +40,7 @@ void askLocation(){
 
 void sendMessage(){
 	down(fila);
-	id = msgget(10003, IPC_CREAT | 0666);
+	id = msgget(MSGCHANNEL, IPC_CREAT | 0666);
 	exit_on_error(id, "msgget");
 
 	MsgViagem m;
@@ -82,9 +61,9 @@ void getAnswear(){
 }
 
 void joinSem(){
-	semPassageiros = semget(10004, 1, IPC_CREAT | 0666);
+	semPassageiros = semget(SEMPASS, 1, IPC_CREAT | 0666);
 	exit_on_error(semPassageiros, "join SemP");
-	fila = semget(10006, 1, IPC_CREAT | 0666);
+	fila = semget(SEMFILA, 1, IPC_CREAT | 0666);
 	exit_on_error(fila, "join fila");
 }
 
@@ -98,5 +77,3 @@ int main(){
 		getAnswear();
 	}
 }
-
-

@@ -1,19 +1,5 @@
 #include "defines.h"
 
-typedef struct{
-	long tipo;
-	struct{
-		int pid_passageiro;
-		int pid_condutor;
-		char local_encontro[100];
-		long data;
-		float pontos;
-		float valor;
-	} dados;
-} MsgViagem;
-
-typedef struct{                                                                                                 int numero;                                                                                                   char nome[50];                                                                                                char turma[10];                                                                                               char telemovel[15];                                                                                           char email[40];                                                                                               char tipo[20];                                                                                                char marca[20];                                                                                               char matricula[15];                                                                                           int viagens;                                                                                                  int pontos;                                                                                                   float saldo;                                                                                                  int activo;                                                                                                   long disponivel_desde;                                                                                        int PID;                                                                                                    } Condutor; 
-
 int posicao, id, status, semCondutores, fila;
 Condutor x;
 Condutor * condutores;
@@ -31,7 +17,7 @@ Condutor getCondutor(){
 
 int checkCondutor(){
 	down(semCondutores);
-	int id = shmget(10001, 1000 * sizeof(Condutor), IPC_CREAT | 0666);
+	int id = shmget(MEMCOND, 1000 * sizeof(Condutor), IPC_CREAT | 0666);
 	exit_on_error(id, "error shmget");
 
 	condutores = (Condutor *)shmat(id, 0, 0);
@@ -57,7 +43,7 @@ void activateDriver(){
 }
 
 void getAnswear(){
-	id=msgget(10003, 0666 | IPC_CREAT);
+	id=msgget(MSGCHANNEL, 0666 | IPC_CREAT);
 	exit_on_error(id, "msgget");
 	status = msgrcv(id, &m, sizeof(m.dados), getpid(), 0);
 	exit_on_error(status, "recepcao");
@@ -112,9 +98,9 @@ void handleSignal(int signum){
 }
 
 void joinSem(){
-	semCondutores = semget(10005, 1, IPC_CREAT | 0666);
+	semCondutores = semget(SEMCOND, 1, IPC_CREAT | 0666);
 	exit_on_error(semCondutores, "join SemC");
-	fila = semget(10006, 1, IPC_CREAT | 0666);
+	fila = semget(SEMFILA, 1, IPC_CREAT | 0666);
 	exit_on_error(fila, "join fila");
 }
 

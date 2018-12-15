@@ -1,43 +1,5 @@
 #include "defines.h"
 
-typedef struct{
-  int numero;
-  char nome[50];
-  char turma[10];
-  char telemovel[15];
-  char email[40];
-  char tipo[20];
-  char marca[20];
-  char matricula[15];
-  int viagens;
-  int pontos;
-  float saldo;
-  int activo;
-  long disponivel_desde;
-  int PID;
-} Condutor;
-
-typedef struct{
-  int numero;
-  char nome[50];
-  char turma[10];
-  char telemovel[15];
-  char email[40];
-  char c_credito[20];
-} Passageiro;
-
-typedef struct{
-	long tipo;
-	struct {
-		int pid_passageiro;
-		int pid_condutor;
-		char local_encontro[100];
-		long data;
-		float pontos;
-		float valor;
-	} dados;
-} MsgViagem;
-
 Condutor *listaDeCondutores;
 int indiceListaDeCondutores = 0;
 Passageiro *listaDePassageiros;
@@ -337,15 +299,15 @@ void checkFiles(){
 }
 
 void makeSharedMemory(){
-  int id = shmget(10001, 1000 * sizeof(Condutor) , IPC_CREAT | 0666);
+  int id = shmget(MEMCOND, 1000 * sizeof(Condutor) , IPC_CREAT | 0666);
   exit_on_error(id, "shmget");
 
-  int di = shmget(10002, 1000 * sizeof(Passageiro) , IPC_CREAT | 0666);
+  int di = shmget(MEMPASS, 1000 * sizeof(Passageiro) , IPC_CREAT | 0666);
   exit_on_error(di, "shmget");
 
   listaDeCondutores = (Condutor *)shmat(id, 0, 0);
   if (listaDeCondutores == NULL) {perror("error attaching"); exit(1);}
-  
+
   listaDePassageiros = (Passageiro *)shmat(di, 0, 0);
   if (listaDePassageiros == NULL) {perror("error attaching"); exit(1);}
 
@@ -393,7 +355,7 @@ void listenForMessages(){
 	if(pidFilho == 0){
 		int msgid, status;
 		MsgViagem m;
-		msgid = msgget(10003, IPC_CREAT | 0666);
+		msgid = msgget(MSGCHANNEL, IPC_CREAT | 0666);
 		exit_on_error(msgid, "criacao de lista de msg");
 		while(1){
 			status = msgrcv(msgid, &m, sizeof(m.dados), 1, 0);
@@ -409,18 +371,18 @@ void listenForMessages(){
 
 void makeSems(){
 	int status;
-	
-	semPassageiros = semget(10004, 1, IPC_CREAT | 0666);
+
+	semPassageiros = semget(SEMPASS, 1, IPC_CREAT | 0666);
 	exit_on_error(semPassageiros, "Criacao de SemP");
 	status = semctl(semPassageiros, 0, SETVAL, 1);
 	exit_on_error(status, "Ligar SemP");
 
-	semCondutores = semget(10005, 1, IPC_CREAT | 0666);
+	semCondutores = semget(SEMCOND, 1, IPC_CREAT | 0666);
 	exit_on_error(semCondutores, "Criacao de SemC");
 	status = semctl(semCondutores, 0, SETVAL, 1);
 	exit_on_error(status, "Ligar SemC");
 
-	fila = semget(10006, 1, IPC_CREAT | 0666);
+	fila = semget(SEMFILA, 1, IPC_CREAT | 0666);
 	exit_on_error(fila, "criacao da fila");
 	status = semctl(fila, 0, SETVAL, 0);
 	exit_on_error(status, "ligar fila");
